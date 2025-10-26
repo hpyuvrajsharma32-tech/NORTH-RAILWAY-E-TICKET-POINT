@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Passenger Form - North Railway E-Ticket Point</title>
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<script>
+  (function(){
+    emailjs.init("YOUR_EMAILJS_USER_ID"); // Replace with your EmailJS User ID
+  })();
+
+  async function sendNotification(event) {
+    event.preventDefault();
+
+    // Form values
+    const form = event.target;
+    const formData = {
+      Name: form.name.value,
+      Age: form.age.value,
+      Gender: form.gender.value,
+      From: form.from.value,
+      To: form.to.value,
+      Class: form.class.value,
+      Quota: form.quota.value,
+      Contact: form.contact.value
+    };
+
+    // Send Email via EmailJS
+    emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", formData)
+      .then(() => alert("Email sent successfully!"))
+      .catch(err => alert("Email error: " + err));
+
+    // Send WhatsApp via Twilio API (via fetch)
+    fetch("https://api.twilio.com/2010-04-01/Accounts/YOUR_TWILIO_ACCOUNT_SID/Messages.json", {
+      method: "POST",
+      headers: {
+        "Authorization": "Basic " + btoa("YOUR_TWILIO_ACCOUNT_SID:YOUR_TWILIO_AUTH_TOKEN"),
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: new URLSearchParams({
+        To: "whatsapp:+91XXXXXXXXXX", // Replace with your WhatsApp number
+        From: "whatsapp:+YOUR_TWILIO_SANDBOX_NUMBER",
+        Body: `New Passenger:\nName: ${formData.Name}\nAge: ${formData.Age}\nGender: ${formData.Gender}\nFrom: ${formData.From}\nTo: ${formData.To}\nClass: ${formData.Class}\nQuota: ${formData.Quota}\nContact: ${formData.Contact}`
+      })
+    }).then(res => console.log("WhatsApp sent"))
+      .catch(err => console.log("WhatsApp error: " + err));
+
+    form.reset();
+  }
+</script>
+</head>
+<body>
+
+<h1>Passenger Details Form</h1>
+
+<form onsubmit="sendNotification(event)">
+  <label>Name:</label><input type="text" name="name" required><br>
+  <label>Age:</label><input type="number" name="age" required><br>
+  <label>Gender:</label>
+    <select name="gender" required>
+      <option>Male</option>
+      <option>Female</option>
+      <option>Other</option>
+    </select><br>
+  <label>From:</label><input type="text" name="from" value="North Railway E-Ticket Point" readonly><br>
+  <label>To:</label><input type="text" name="to" required><br>
+  <label>Class:</label><input type="text" name="class" required><br>
+  <label>Quota:</label><input type="text" name="quota" required><br>
+  <label>Contact:</label><input type="text" name="contact" required><br>
+  <button type="submit">Submit</button>
+</form>
+
+</body>
+</html>
